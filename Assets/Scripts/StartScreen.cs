@@ -5,12 +5,19 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Runtime.Serialization;
 
 public class StartScreen : MonoBehaviour
 {
+    
+
+    
     // Start is called before the first frame update
     [SerializeField] Button StartGame;
     [SerializeField] Button Exit;
+
+    
     void Start()
     {
         StartGame.onClick.AddListener(LoadLevel1);
