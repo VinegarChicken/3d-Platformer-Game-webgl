@@ -5,12 +5,12 @@ using UnityEngine;
 public class DontDestroyOnLoad : MonoBehaviour
 {
 
-    [Header("Object you don't want to destroy on load")]
-    public GameObject _GameObject;
+    
+    
     // Start is called before the first frame update
     void Start()
     {
-        DontDestroyOnLoad(_GameObject);
+        DontDestroyOnLoad(gameObject);
     }
 
     // Update is called once per frame

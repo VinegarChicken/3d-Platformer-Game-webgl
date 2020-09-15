@@ -13,24 +13,29 @@ using UnityEngine.Rendering;
 public class BallController : MonoBehaviour
 {
     
-    [Range(0f,10f)] [SerializeField]  public float force = 1f;
-    [Range(0f,10f)] [SerializeField]   public float jumpforce = 8f;
+    [Range(0f,10f)]   public float force = 1f;
+    [Range(0f,10f)]    public float jumpforce = 8f;
+    [SerializeField] ParticleSystem DeathExplosion;
      bool onGround = true;
      bool walljump;
-
-     TextMeshProUGUI Lives;
     
+     TextMeshProUGUI Lives;
+     public enum Status
+     {
+         Alive, Dead, LevelComplete
+     }
 
+     private int particlecount;
     int livecount = 3;
     //[SerializeField] AudioClip coinsound;
     
      // Start is called before the first frame update
      Rigidbody PlayerRb;
-     
+     private Status _status = Status.Alive;
     void Start()
     {
         
-        //Lives = GameObject.Find("GameUi").GetComponentInChildren<TextMeshProUGUI>();
+        Lives = GameObject.Find("GameUi").GetComponentInChildren<TextMeshProUGUI>();
         PlayerRb = GetComponent<Rigidbody>();
         
 
@@ -47,6 +52,7 @@ public class BallController : MonoBehaviour
     void Update()
     {
         
+        //DeathExplosion.transform.position = transform.position;
         if (Input.GetKey(KeyCode.Escape))
         {
             Application.Quit();
@@ -56,43 +62,79 @@ public class BallController : MonoBehaviour
         jump();
         if (transform.position.y < 0)
         {
-          die();
+            
+            _status = Status.Dead;
+            Invoke(nameof(die), 1f);
             
         }
+        ParticleManager();
        
     }
+
 
     void die()
     {
         
         livecount--;
-
+        /*
         transform.position = new Vector3(30.9599991f, 1.75f, 4.0999999f);
-        Lives.text = "Lives: " + livecount;
-        if (livecount == 0)
-        {
-            int LevelNumber = SceneManager.GetActiveScene().buildIndex;
+        */
+        
+        
+            
+            Lives.text = "Lives: " + livecount;
+            
+            Destroy(GameObject.Find("Ball"));
+                int LevelNumber = SceneManager.GetActiveScene().buildIndex;
 
             
         
-            SceneManager.LoadScene(LevelNumber);
+                SceneManager.LoadScene(LevelNumber);
+            
+        
+        
+    }
+
+    void ParticleManager()
+    {
+        if (_status == Status.Dead)
+        {
+            if (!DeathExplosion.isPlaying)
+            {
+                DeathExplosion.Play();
+            }
+            
+        }
+        else
+        {
+            DeathExplosion.Stop();
         }
     }
-   
     void OnCollisionEnter(Collision collision) {
-        //checks if collider is tagged "ground"
-        if(collision.gameObject.CompareTag("jumpable")){
-            
-            //if the collider is tagged "ground", sets onGround boolean to true
-            onGround = true;
-        }
-
         
-        
-        if (collision.gameObject.CompareTag("enemy") || collision.gameObject.CompareTag("LevelHazard"))
+        switch (collision.gameObject.tag)
         {
-            die();
+                
+            case "jumpable":
+                
+                onGround = true;
+                break;
+            
+            case "enemy":
+                _status = Status.Dead;
+                
+                Invoke(nameof(die),1f);
+                break;
+            
+            case "LevelHazard":
+                _status = Status.Dead;
+                Invoke(nameof(die),1f);
+                break;
+            
+
         }
+        
+  
         
 
     }
@@ -115,18 +157,60 @@ public class BallController : MonoBehaviour
     void MoveBall()
     {
 
-        
+        /*
         float moveHorizontal = Input.GetAxis("Horizontal");
-            float moveVertical = Input.GetAxis("Vertical");
-            if (Input.GetKey(KeyCode.UpArrow))
-            {
-                PlayerRb.AddForce(Vector3.forward*Time.deltaTime);
-                
-                
-            }
-            
-            Vector3 movement = new Vector3 (moveVertical, 0.0f,-moveHorizontal);
+        float moveVertical = Input.GetAxis("Vertical");
+        Vector3 movement = new Vector3 (moveVertical*force, 0.0f,-moveHorizontal*force);
             PlayerRb.AddForce(movement * force);
+        */
+        if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D))
+        {
+            if (Input.GetKey(KeyCode.B))
+            {
+                force = 2f;
+            }
+            else
+            {
+                force = 1f;
+            }
+            PlayerRb.AddForce(Vector3.back*force);
+        }
         
+        if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A))
+        {
+            if (Input.GetKey(KeyCode.B))
+            {
+                force = 2f;
+            }
+            else
+            {
+                force = 1f;
+            }
+            PlayerRb.AddForce(Vector3.forward*force);
+        }
+        if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.W))
+        {
+            if (Input.GetKey(KeyCode.B))
+            {
+                force = 2f;
+            }
+            else
+            {
+                force = 1f;
+            }
+            PlayerRb.AddForce(Vector3.right*force);
+        }
+        if (Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.S))
+        {
+            if (Input.GetKey(KeyCode.B))
+            {
+                force = 2f;
+            }
+            else
+            {
+                force = 1f;
+            }
+            PlayerRb.AddForce(Vector3.left*force);
+        }
     }
 }
